@@ -30,6 +30,19 @@ main{flex:1;min-width:0;max-width:860px;padding:12px 16px 96px}
 h2.sh{margin:4px 0 2px;color:var(--navy2);font-size:20px}
 @media(min-width:700px){.rail{width:150px}}
 @media(max-width:699px){body.playpage .rail{display:none}}
+.side{display:none}
+@media(min-width:700px){
+ nav.tabs,.rail{display:none !important}
+ main{padding-bottom:40px}
+ .wrap{max-width:1300px}
+ .side{display:flex;flex-direction:column;gap:6px;position:sticky;top:104px;align-self:flex-start;width:230px;flex:none;padding:14px 8px 40px 14px;max-height:calc(100vh - 104px);overflow-y:auto}
+ .st-tab{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;font-weight:800;font-size:15px;color:var(--navy2);text-decoration:none;background:#fff;border:1px solid var(--line)}
+ .st-tab b{font-size:18px}
+ .st-tab.on{background:var(--navy2);color:#fff;border-color:var(--navy2);box-shadow:inset 4px 0 0 var(--amber)}
+ .side-sec{display:flex;flex-direction:column;gap:5px;margin:2px 0 8px 18px}
+ .side-sec .rb{padding:8px 10px;font-size:13px}
+ .side-sec .rb.sub{margin-left:14px}
+}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav.tabs a{flex:1;text-align:center;padding:10px 0 8px;color:var(--mute);text-decoration:none;font-size:11px;font-weight:700}
 nav.tabs a b{display:block;font-size:19px;margin-bottom:2px}
@@ -86,7 +99,7 @@ const DEMO = !CFG.SUPABASE_URL;
 const sb = DEMO ? null : supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
 const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
 const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
-const TABS = [['run','Run','🏈'],['pass','Pass','🎯'],['form','Formations','📐'],['pos','Positions','👥'],['learn','Learn','📘']];
+const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['pos','Positions','👥'],['learn','Learn','📘']];
 const SECTIONS = {
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
   pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS']]
@@ -139,7 +152,7 @@ function shell(tab, body, rail){
   $('#app').innerHTML = `<header><div class="hrow"><div class="brand">⚓ BRANDON'S <span>PLAYBOOK</span></div>${DEMO?'<span class="demo">DEMO</span>':''}
    <button class="hbtn" onclick="signOut()">${DEMO?'↻':'Out'}</button></div>
    <input id="search" type="search" placeholder="Search plays, calls, routes…" value="${esc(q)}"></header>
-   <div class="wrap">${rail?`<aside class="rail">${rail}</aside>`:''}<main>${body}</main></div>
+   <div class="wrap"><aside class="side">${TABS.map(([k,l,i])=>`<a href="#/${k}" class="st-tab ${k===tab?'on':''}"><b>${i}</b>${l}</a>${k===tab&&rail?`<div class="side-sec">${rail}</div>`:''}`).join('')}</aside>${rail?`<aside class="rail">${rail}</aside>`:''}<main>${body}</main></div>
    <nav class="tabs">${TABS.map(([k,l,i])=>`<a href="#/${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</a>`).join('')}</nav>`;
   const s = $('#search');
   s.oninput = () => { S.q = s.value; if (location.hash !== '#/search') location.hash = '#/search'; else route(); };
@@ -226,7 +239,7 @@ function learnView(slug){
 }
 function route(){
   document.body.classList.toggle('playpage', (location.hash||'').startsWith('#/play/'));
-  const [_, v, id] = (location.hash||'#/run').split('/');
+  const [_, v, id] = (location.hash||'#/form').split('/');
   if (v==='play') return playView(id);
   if (v==='run') return listView('run', id);
   if (v==='pos') return posView(id);
@@ -234,7 +247,7 @@ function route(){
   if (v==='search') return searchView();
   if (v==='pass') return listView('pass', id);
   if (v==='form') return formView();
-  return listView('run', id);
+  return formView();
 }
 window.addEventListener('hashchange', route);
 
