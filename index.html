@@ -102,6 +102,7 @@ const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flan
 const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['pos','Positions','👥'],['learn','Learn','📘']];
 const SECTIONS = {
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
+  form: [['all','All'],['p11','11 Personnel','FORMATIONS','11'],['p12','12 Personnel','FORMATIONS','12'],['p21','21 Personnel','FORMATIONS','21'],['p22','22 Personnel','FORMATIONS','22'],['p23','23 Personnel','FORMATIONS','23']],
   pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS']]
 };
 const RUN_PHASES = ['run','rpo','goal line'];
@@ -181,10 +182,15 @@ function listView(kind, sec){
     : grouped(list);
   shell(kind, head + body, railHTML(kind, sec));
 }
-function formView(){
-  const list = S.plays.filter(p=>p.phase==='formation');
-  shell('form', `<h2 class="sh">Formations</h2>` + list.map(p=>`<a class="card" href="#/play/${p.id}"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.formation)}</small></div></a>`).join(''),
-    list.map(p=>`<a class="rb" href="#/play/${p.id}">${esc(p.name)}</a>`).join(''));
+const PERS = {'11':'1 back · 1 TE · 3 WR','12':'1 back · 2 TE · 2 WR','21':'2 backs · 1 TE · 2 WR','22':'2 backs · 2 TE · 1 WR','23':'2 backs · 3 TE · 0 WR'};
+function formView(sec){
+  sec = sec || 'all';
+  const def = SECTIONS.form.find(x=>x[0]===sec) || SECTIONS.form[0];
+  const all = S.plays.filter(p=>p.phase==='formation');
+  const groups = def[3] ? [def[3]] : ['11','12','21','22','23'];
+  const fcard = p=>`<a class="card" href="#/play/${p.id}"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.call_name)}</small></div></a>`;
+  const body = groups.map(g=>{ const l = all.filter(p=>p.subgroup===g); return l.length ? `<h2 class="fam">${g} personnel <span style="text-transform:none;letter-spacing:0;color:var(--mute);font-weight:600">· ${PERS[g]}</span></h2>`+l.map(fcard).join('') : ''; }).join('');
+  shell('form', `<h2 class="sh">${def[0]==='all'?'Formations':esc(def[1])}</h2><div class="mute">Direction = the TE (Y) side · Gun is a tag (Ace Gun, Trips Gun, Bunch Gun)</div>` + body, railHTML('form', sec));
 }
 function searchView(){
   const q = (S.q||'').toLowerCase().trim();
@@ -195,7 +201,7 @@ function searchView(){
 function playView(id){
   const p = S.plays.find(x=>x.id===id); if (!p) return listView('run');
   const tab = tabOf(p);
-  const sk = tab==='form' ? null : ((SECTIONS[tab].find(x=>x[2]===p.family && x[3] && x[3]===p.subgroup) || SECTIONS[tab].find(x=>x[2]===p.family && !x[3]) || [])[0]);
+  const sk = ((SECTIONS[tab].find(x=>x[2]===p.family && x[3] && x[3]===p.subgroup) || SECTIONS[tab].find(x=>x[2]===p.family && !x[3]) || [])[0]);
   const asg = POS.map(pos => S.asg.find(a=>a.play_id===id && a.position===pos)).filter(Boolean);
   const blank = POS.filter(pos => !asg.find(a=>a.position===pos));
   const sib = S.plays.filter(x=>tabOf(x)===tab), i = sib.indexOf(p), prev = sib[i-1], next = sib[i+1];
@@ -214,7 +220,7 @@ function playView(id){
   <div class="sec"><h3>Why we call it</h3><p>${p.why||''}</p></div>
   ${(p.keys||[]).length?`<div class="sec"><h3>Coaching keys</h3><ul>${p.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>`:''}
   ${p.sequence?`<div class="sec"><h3>Sequence</h3><p>${esc(p.sequence)}</p></div>`:''}
-  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, tab==='form' ? S.plays.filter(x=>x.phase==='formation').map(f=>`<a class="rb ${f.id===p.id?'on':''}" href="#/play/${f.id}">${esc(f.name)}</a>`).join('') : railHTML(tab, sk || 'all'));
+  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, railHTML(tab, sk || 'all'));
   window.scrollTo(0,0);
 }
 function posView(pos){
@@ -246,7 +252,7 @@ function route(){
   if (v==='learn') return learnView(id);
   if (v==='search') return searchView();
   if (v==='pass') return listView('pass', id);
-  if (v==='form') return formView();
+  if (v==='form') return formView(id);
   return formView();
 }
 window.addEventListener('hashchange', route);
