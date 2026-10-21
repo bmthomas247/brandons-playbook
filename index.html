@@ -20,9 +20,18 @@ header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding
 #search{width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:0;font-size:16px}
 .demo{background:var(--amber);color:#111;font-size:11px;font-weight:800;padding:2px 8px;border-radius:5px}
 .hbtn{background:none;border:1px solid #ffffff44;color:#fff;border-radius:8px;padding:5px 10px;font-size:13px}
-main{max-width:860px;margin:0 auto;padding:12px 16px 96px}
+main{flex:1;min-width:0;max-width:860px;padding:12px 16px 96px}
+.wrap{display:flex;max-width:1100px;margin:0 auto}
+.rail{position:sticky;top:104px;align-self:flex-start;width:96px;flex:none;display:flex;flex-direction:column;gap:6px;padding:12px 0 96px 10px;max-height:calc(100vh - 104px);overflow-y:auto}
+.rb{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 8px;font-size:13px;font-weight:800;color:var(--navy2);text-decoration:none;line-height:1.2}
+.rb small{display:block;font-size:10px;font-weight:600;color:var(--mute);margin-top:2px}
+.rb.on{background:var(--navy2);color:#fff;border-color:var(--navy2)} .rb.on small{color:#cbd5e1}
+.rb.sub{margin-left:12px;padding:7px 8px;font-size:12px}
+h2.sh{margin:4px 0 2px;color:var(--navy2);font-size:20px}
+@media(min-width:700px){.rail{width:150px}}
+@media(max-width:699px){body.playpage .rail{display:none}}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav.tabs a{flex:1;text-align:center;padding:10px 0 8px;color:var(--mute);text-decoration:none;font-size:12px;font-weight:700}
+nav.tabs a{flex:1;text-align:center;padding:10px 0 8px;color:var(--mute);text-decoration:none;font-size:11px;font-weight:700}
 nav.tabs a b{display:block;font-size:19px;margin-bottom:2px}
 nav.tabs a.on{color:var(--navy2);box-shadow:inset 0 3px 0 var(--amber)}
 h2.fam{font-size:12px;letter-spacing:1.2px;color:var(--navy2);margin:18px 0 8px;text-transform:uppercase}
@@ -77,8 +86,13 @@ const DEMO = !CFG.SUPABASE_URL;
 const sb = DEMO ? null : supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
 const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
 const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
-const TABS = [['run','Run','🏈'],['pass','Pass','🎯'],['pos','Positions','👥'],['learn','Learn','📘']];
+const TABS = [['run','Run','🏈'],['pass','Pass','🎯'],['form','Formations','📐'],['pos','Positions','👥'],['learn','Learn','📘']];
+const SECTIONS = {
+  run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
+  pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS']]
+};
 const RUN_PHASES = ['run','rpo','goal line'];
+const tabOf = p => p.phase==='formation' ? 'form' : RUN_PHASES.includes(p.phase) ? 'run' : 'pass';
 let S = {plays:[], asg:[], pages:[], admin:false, user:null};
 const $ = s => document.querySelector(s);
 const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -86,7 +100,7 @@ const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&
 async function boot(){
   if (DEMO){
     const d = await (await fetch('demo-data.json')).json();
-    S.plays = d.plays; S.asg = d.assignments; S.pages = d.pages; S.admin = true; S.user = {email:'demo'};
+    S.hidden = d.plays.filter(x=>x.hidden); S.plays = d.plays.filter(x=>!x.hidden); S.asg = d.assignments; S.pages = d.pages; S.admin = true; S.user = {email:'demo'};
     return route();
   }
   const { data:{ session } } = await sb.auth.getSession();
@@ -101,7 +115,7 @@ async function load(){
     sb.from('assignments').select('*'),
     sb.from('pages').select('*').order('sort')]);
   if (p.error) { return noAccess(p.error.message); }
-  S.plays = p.data; S.asg = a.data||[]; S.pages = g.data||[]; S.admin = true;
+  S.hidden = p.data.filter(x=>x.hidden); S.plays = p.data.filter(x=>!x.hidden); S.asg = a.data||[]; S.pages = g.data||[]; S.admin = true;
   if (!S.plays.length) return noAccess();
 }
 function loginView(msg){
@@ -120,12 +134,12 @@ function noAccess(m){
 }
 async function signOut(){ if (sb) await sb.auth.signOut(); location.hash=''; location.reload(); }
 
-function shell(tab, body){
+function shell(tab, body, rail){
   const q = (S.q||'');
   $('#app').innerHTML = `<header><div class="hrow"><div class="brand">⚓ BRANDON'S <span>PLAYBOOK</span></div>${DEMO?'<span class="demo">DEMO</span>':''}
    <button class="hbtn" onclick="signOut()">${DEMO?'↻':'Out'}</button></div>
    <input id="search" type="search" placeholder="Search plays, calls, routes…" value="${esc(q)}"></header>
-   <main>${body}</main>
+   <div class="wrap">${rail?`<aside class="rail">${rail}</aside>`:''}<main>${body}</main></div>
    <nav class="tabs">${TABS.map(([k,l,i])=>`<a href="#/${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</a>`).join('')}</nav>`;
   const s = $('#search');
   s.oninput = () => { S.q = s.value; if (location.hash !== '#/search') location.hash = '#/search'; else route(); };
@@ -139,10 +153,25 @@ function grouped(list){
   const fams = []; list.forEach(p => { if (!fams.includes(p.family)) fams.push(p.family); });
   return fams.map(f => `<h2 class="fam">${esc(f)}</h2>` + list.filter(p=>p.family===f).map(card).join('')).join('');
 }
-function listView(kind){
-  const list = S.plays.filter(p => kind==='run' ? RUN_PHASES.includes(p.phase) : !RUN_PHASES.includes(p.phase));
-  const inst = list.filter(p=>/installed/i.test(p.status)).length;
-  shell(kind, `<div class="mute">${list.length} plays · ${inst} installed</div>` + grouped(list));
+function railHTML(kind, cur){
+  return SECTIONS[kind].map(([k,l,fam,sub,child])=>`<a class="rb ${child?'sub':''} ${k===cur?'on':''}" href="#/${kind}/${k}">${l}</a>`).join('');
+}
+function listView(kind, sec){
+  sec = sec || 'all';
+  const all = S.plays.filter(p => tabOf(p)===kind);
+  const def = SECTIONS[kind].find(x=>x[0]===sec) || SECTIONS[kind][0];
+  let list = def[2] ? all.filter(p=>p.family===def[2]) : all;
+  if (def[3]) list = list.filter(p=>p.subgroup===def[3]);
+  const head = `<h2 class="sh">${esc(def[0]==='all'?(kind==='run'?'All runs':'All passes'):def[1])}</h2><div class="mute">${list.length} plays · ${list.filter(p=>/installed/i.test(p.status)).length} installed</div>`;
+  const body = (def[2]==='PASS · HALF-FIELD' && !def[3])
+    ? ['2 WR','3 WR'].map(g=>`<h2 class="fam">${g} sets</h2>`+list.filter(p=>p.subgroup===g).map(card).join('')).join('')
+    : grouped(list);
+  shell(kind, head + body, railHTML(kind, sec));
+}
+function formView(){
+  const list = S.plays.filter(p=>p.phase==='formation');
+  shell('form', `<h2 class="sh">Formations</h2>` + list.map(p=>`<a class="card" href="#/play/${p.id}"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.formation)}</small></div></a>`).join(''),
+    list.map(p=>`<a class="rb" href="#/play/${p.id}">${esc(p.name)}</a>`).join(''));
 }
 function searchView(){
   const q = (S.q||'').toLowerCase().trim();
@@ -152,16 +181,17 @@ function searchView(){
 }
 function playView(id){
   const p = S.plays.find(x=>x.id===id); if (!p) return listView('run');
-  const tab = RUN_PHASES.includes(p.phase) ? 'run' : 'pass';
+  const tab = tabOf(p);
+  const sk = tab==='form' ? null : ((SECTIONS[tab].find(x=>x[2]===p.family && x[3] && x[3]===p.subgroup) || SECTIONS[tab].find(x=>x[2]===p.family && !x[3]) || [])[0]);
   const asg = POS.map(pos => S.asg.find(a=>a.play_id===id && a.position===pos)).filter(Boolean);
   const blank = POS.filter(pos => !asg.find(a=>a.position===pos));
-  const i = S.plays.indexOf(p), prev = S.plays[i-1], next = S.plays[i+1];
+  const sib = S.plays.filter(x=>tabOf(x)===tab), i = sib.indexOf(p), prev = sib[i-1], next = sib[i+1];
   shell(tab, `
   <div class="ph"><div class="n">${esc(p.num)}</div><div><h1>${esc(p.name)}</h1><div class="call">CALL: <b>${esc(p.call_name)}</b></div>
   <div class="chips"><span class="chip">${esc(p.formation)}</span><span class="st ${stClass(p.status)}">${esc(p.status)}</span>${(p.flags||[]).map(f=>`<span class="conf conf-inferred">${esc(f)}</span>`).join('')}</div></div></div>
   <div class="diagram">${p.diagram_svg||''}</div>
   <div class="row">${p.hudl_url?`<a class="btn" href="${esc(p.hudl_url)}" target="_blank" rel="noopener">Open in Hudl ↗</a>`:'<span class="mute">No Hudl link yet.</span>'}
-   ${S.admin?`<button class="btn sm alt" onclick="editHudl('${p.id}')">${p.hudl_url?'Edit':'Add'} Hudl link</button>`:''}</div>
+   ${S.admin?`<button class="btn sm alt" onclick="editHudl('${p.id}')">${p.hudl_url?'Edit':'Add'} Hudl link</button><button class="btn sm alt" onclick="setHidden('${p.id}',true)">Hide play</button>`:''}</div>
   <div class="sec"><h3>Position jobs</h3><table class="asg">${asg.map(a=>`<tr><td class="pos">${a.position}</td><td>${esc(a.job)}<span class="conf conf-${a.confidence}">${a.confidence.toUpperCase()}</span></td>
     ${S.admin?`<td style="width:44px"><button class="btn sm alt" onclick="editAsg('${p.id}','${a.position}')">Edit</button></td>`:''}</tr>`).join('')}</table>
    ${!asg.length?'<p class="mute">Not written yet.</p>':''}
@@ -171,19 +201,19 @@ function playView(id){
   <div class="sec"><h3>Why we call it</h3><p>${p.why||''}</p></div>
   ${(p.keys||[]).length?`<div class="sec"><h3>Coaching keys</h3><ul>${p.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>`:''}
   ${p.sequence?`<div class="sec"><h3>Sequence</h3><p>${esc(p.sequence)}</p></div>`:''}
-  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`);
+  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, tab==='form' ? S.plays.filter(x=>x.phase==='formation').map(f=>`<a class="rb ${f.id===p.id?'on':''}" href="#/play/${f.id}">${esc(f.name)}</a>`).join('') : railHTML(tab, sk || 'all'));
   window.scrollTo(0,0);
 }
 function posView(pos){
   pos = pos || 'Q';
-  const rows = S.plays.map(p => ({p, a:S.asg.find(a=>a.play_id===p.id && a.position===pos)}));
+  const rows = S.plays.filter(p=>p.phase!=='formation').map(p => ({p, a:S.asg.find(a=>a.play_id===p.id && a.position===pos)}));
   const have = rows.filter(r=>r.a), miss = rows.filter(r=>!r.a);
-  shell('pos', `<div class="chips">${POS.map(x=>`<a class="chip ${x===pos?'on':''}" href="#/pos/${x}">${x}</a>`).join('')}</div>
+  shell('pos', `
    <h2 class="fam">${POSNAME[pos]} — your job on every play</h2>
    <div class="mute">${have.length} written · ${miss.length} still to write</div>
    ${['run','pass'].map(k=>{ const r = have.filter(x=> k==='run'?RUN_PHASES.includes(x.p.phase):!RUN_PHASES.includes(x.p.phase));
      return r.length?`<h2 class="fam">${k==='run'?'Run':'Pass'}</h2>`+r.map(({p,a})=>`<a class="posjob" href="#/play/${p.id}"><b>${esc(p.num)} · ${esc(p.name)}</b> <span class="conf conf-${a.confidence}">${a.confidence.toUpperCase()}</span><div class="j">${esc(a.job)}</div></a>`).join(''):''}).join('')}
-   ${miss.length?`<details class="sec"><summary class="mute">Not written yet (${miss.length})</summary>${miss.map(({p})=>`<div><a href="#/play/${p.id}">${esc(p.num)} ${esc(p.name)}</a></div>`).join('')}</details>`:''}`);
+   ${miss.length?`<details class="sec"><summary class="mute">Not written yet (${miss.length})</summary>${miss.map(({p})=>`<div><a href="#/play/${p.id}">${esc(p.num)} ${esc(p.name)}</a></div>`).join('')}</details>`:''}`, POS.map(x=>`<a class="rb ${x===pos?'on':''}" href="#/pos/${x}">${x}<small>${POSNAME[x]}</small></a>`).join(''));
 }
 function learnView(slug){
   if (slug){
@@ -191,16 +221,20 @@ function learnView(slug){
     return shell('learn', `<a class="mute" href="#/learn">‹ Learn</a><h1 style="color:#13315c;font-size:22px">${esc(g?.title)}</h1><div class="book">${g?.html||''}</div>`);
   }
   const secs = []; S.pages.forEach(g=>{ if(!secs.includes(g.section)) secs.push(g.section); });
-  shell('learn', secs.map(s=>`<h2 class="fam">${esc(s)}</h2>`+S.pages.filter(g=>g.section===s).map(g=>`<a class="card" href="#/learn/${g.slug}"><div class="t"><b>${esc(g.title)}</b></div>›</a>`).join('')).join(''));
+  const hid = (S.hidden||[]).length ? `<h2 class="fam">Hidden plays (${S.hidden.length})</h2>` + S.hidden.map(p=>`<div class="card"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.family)}</small></div><button class="btn sm alt" onclick="setHidden('${p.id}',false)">Unhide</button></div>`).join('') : '';
+  shell('learn', secs.map(s=>`<h2 class="fam">${esc(s)}</h2>`+S.pages.filter(g=>g.section===s).map(g=>`<a class="card" href="#/learn/${g.slug}"><div class="t"><b>${esc(g.title)}</b></div>›</a>`).join('')).join('') + hid);
 }
 function route(){
+  document.body.classList.toggle('playpage', (location.hash||'').startsWith('#/play/'));
   const [_, v, id] = (location.hash||'#/run').split('/');
   if (v==='play') return playView(id);
+  if (v==='run') return listView('run', id);
   if (v==='pos') return posView(id);
   if (v==='learn') return learnView(id);
   if (v==='search') return searchView();
-  if (v==='pass') return listView('pass');
-  return listView('run');
+  if (v==='pass') return listView('pass', id);
+  if (v==='form') return formView();
+  return listView('run', id);
 }
 window.addEventListener('hashchange', route);
 
@@ -233,6 +267,12 @@ function editHudl(pid){
     if (!DEMO){ const {error} = await sb.from('plays').update({hudl_url:v}).eq('id',pid); if (error) return alert(error.message); }
     p.hudl_url = v; $('#dlg').close(); route();
   };
+}
+async function setHidden(pid,h){
+  if (!DEMO){ const {error} = await sb.from('plays').update({hidden:h}).eq('id',pid); if (error) return alert(error.message); }
+  const all = S.plays.concat(S.hidden); const p = all.find(x=>x.id===pid); p.hidden = h;
+  all.sort((a,b)=>a.sort-b.sort); S.plays = all.filter(x=>!x.hidden); S.hidden = all.filter(x=>x.hidden);
+  location.hash = h ? '#/'+tabOf(p) : '#/play/'+pid; route();
 }
 if (sb) sb.auth.onAuthStateChange((e)=>{ if (e==='SIGNED_IN' && !S.plays.length) boot(); });
 boot();
