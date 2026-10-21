@@ -226,7 +226,7 @@ function formView(sec){
   const groups = def[3] ? [def[3]] : ['11','12','21','22','23'];
   const fcard = p=>`<a class="card" href="#/play/${p.id}"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.call_name)}</small></div></a>`;
   const body = groups.map(g=>{ const l = all.filter(p=>p.subgroup===g); return l.length ? `<h2 class="fam">${g} personnel <span style="text-transform:none;letter-spacing:0;color:var(--mute);font-weight:600">· ${PERS[g]}</span></h2>`+l.map(fcard).join('') : ''; }).join('');
-  shell('form', `<h2 class="sh">${def[0]==='all'?'Formations':esc(def[1])}</h2><div class="mute">Direction = the TE (Y) side · Gun is a tag (Ace Gun, Trips Gun, Bunch Gun)</div>` + body, railHTML('form', sec));
+  shell('form', `<h2 class="sh">${def[0]==='all'?'Formations':esc(def[1])}</h2><div class="mute">Direction = the TE (Y) side · Gun is a tag (Ace Gun, Trey Gun, Trident Gun) · Empty is always gun</div>` + body, railHTML('form', sec));
 }
 function searchView(){
   const q = (S.q||'').toLowerCase().trim();
