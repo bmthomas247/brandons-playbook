@@ -29,7 +29,7 @@ main{flex:1;min-width:0;max-width:860px;padding:12px 16px 96px}
 .rb.sub{margin-left:12px;padding:7px 8px;font-size:12px}
 h2.sh{margin:4px 0 2px;color:var(--navy2);font-size:20px}
 @media(min-width:700px){.rail{width:150px}}
-@media(max-width:699px){body.playpage .rail{display:none}}
+@media(max-width:699px){body.playpage .rail{display:none} .rail .ri{display:none}}
 .side{display:none}
 @media(min-width:700px){
  nav.tabs,.rail{display:none !important}
@@ -42,6 +42,10 @@ h2.sh{margin:4px 0 2px;color:var(--navy2);font-size:20px}
  .side-sec{display:flex;flex-direction:column;gap:5px;margin:2px 0 8px 18px}
  .side-sec .rb{padding:8px 10px;font-size:13px}
  .side-sec .rb.sub{margin-left:14px}
+ .ri{display:block;margin-left:12px;padding:5px 10px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;border-left:2px solid var(--line)}
+ .ri.sub{margin-left:26px}
+ .ri:hover{color:var(--navy2);border-left-color:var(--amber)}
+ .ri.on{color:var(--navy2);font-weight:800;border-left:3px solid var(--amber);background:#fff7ed}
 }
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav.tabs a{flex:1;text-align:center;padding:10px 0 8px;color:var(--mute);text-decoration:none;font-size:11px;font-weight:700}
@@ -167,8 +171,17 @@ function grouped(list){
   const fams = []; list.forEach(p => { if (!fams.includes(p.family)) fams.push(p.family); });
   return fams.map(f => `<h2 class="fam">${esc(f)}</h2>` + list.filter(p=>p.family===f).map(card).join('')).join('');
 }
-function railHTML(kind, cur){
-  return SECTIONS[kind].map(([k,l,fam,sub,child])=>`<a class="rb ${child?'sub':''} ${k===cur?'on':''}" href="#/${kind}/${k}">${l}</a>`).join('');
+function railHTML(kind, cur, pid){
+  const secs = SECTIONS[kind];
+  return secs.map(([k,l,fam,sub,child])=>{
+    let out = `<a class="rb ${child?'sub':''} ${k===cur?'on':''}" href="#/${kind}/${k}">${l}</a>`;
+    if (!fam) return out;
+    const hasKids = !sub && secs.some(x=>x[2]===fam && x[3]);
+    const open = kind==='form' || k===cur || (hasKids && secs.some(x=>x[2]===fam && x[3] && x[0]===cur));
+    if (!open || (hasKids && kind!=='form')) return out;
+    const items = S.plays.filter(p=>p.family===fam && (!sub || p.subgroup===sub));
+    return out + items.map(p=>`<a class="ri ${child?'sub':''} ${p.id===pid?'on':''}" href="#/play/${p.id}">${esc(p.name)}</a>`).join('');
+  }).join('');
 }
 function listView(kind, sec){
   sec = sec || 'all';
@@ -220,7 +233,7 @@ function playView(id){
   <div class="sec"><h3>Why we call it</h3><p>${p.why||''}</p></div>
   ${(p.keys||[]).length?`<div class="sec"><h3>Coaching keys</h3><ul>${p.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>`:''}
   ${p.sequence?`<div class="sec"><h3>Sequence</h3><p>${esc(p.sequence)}</p></div>`:''}
-  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, railHTML(tab, sk || 'all'));
+  <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, railHTML(tab, sk || 'all', p.id));
   window.scrollTo(0,0);
 }
 function posView(pos){
