@@ -113,7 +113,7 @@ const SECTIONS = {
   prot: [['all','All']],
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
   form: [['all','All'],['p11','11 Personnel','FORMATIONS','11'],['p12','12 Personnel','FORMATIONS','12'],['p21','21 Personnel','FORMATIONS','21'],['p22','22 Personnel','FORMATIONS','22'],['p23','23 Personnel','FORMATIONS','23']],
-  pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS']]
+  pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS'],['rb','RB Routes','PASS · RB ROUTES']]
 };
 const RUN_PHASES = ['run','rpo','goal line'];
 const tabOf = p => p.phase==='formation' ? 'form' : p.phase==='protection' ? 'prot' : RUN_PHASES.includes(p.phase) ? 'run' : 'pass';
