@@ -110,7 +110,7 @@ const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
 const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
 const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['prot','Protection','🛡️'],['pos','Positions','👥'],['learn','Learn','📘']];
 const SECTIONS = {
-  prot: [['all','All']],
+  prot: [['all','All'],['bob','BOB (5-man)','PROTECTION · BOB'],['slide','Slides','PROTECTION · SLIDE'],['roll','Rollout','PROTECTION · ROLLOUT'],['pa','Play-Action','PROTECTION · PA']],
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
   form: [['all','All'],['p11','11 Personnel','FORMATIONS','11'],['p12','12 Personnel','FORMATIONS','12'],['p21','21 Personnel','FORMATIONS','21'],['p22','22 Personnel','FORMATIONS','22'],['p23','23 Personnel','FORMATIONS','23']],
   pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS'],['rb','RB Routes','PASS · RB ROUTES']]
@@ -282,7 +282,9 @@ function learnView(slug){
   const hid = (S.hidden||[]).length ? `<h2 class="fam">Hidden plays (${S.hidden.length})</h2>` + S.hidden.map(p=>`<div class="card"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.family)}</small></div><button class="btn sm alt" onclick="setHidden('${p.id}',false)">Unhide</button></div>`).join('') : '';
   shell('learn', secs.map(s=>`<h2 class="fam">${esc(s)}</h2>`+S.pages.filter(g=>g.section===s).map(g=>`<a class="card" href="#/learn/${g.slug}"><div class="t"><b>${esc(g.title)}</b></div>›</a>`).join('')).join('') + hid);
 }
+function applySections(){ const g=(S.pages||[]).find(x=>x.slug==='sections-json'); if(g){ try{ Object.assign(SECTIONS, JSON.parse(g.html)); }catch(e){} } }
 function route(){
+  applySections();
   document.body.classList.toggle('playpage', (location.hash||'').startsWith('#/play/'));
   const [_, v, id] = (location.hash||'#/form').split('/');
   if (v==='play') return playView(id);
