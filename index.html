@@ -108,14 +108,15 @@ const DEMO = !CFG.SUPABASE_URL;
 const sb = DEMO ? null : supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
 const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
 const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
-const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['pos','Positions','👥'],['learn','Learn','📘']];
+const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['prot','Protection','🛡️'],['pos','Positions','👥'],['learn','Learn','📘']];
 const SECTIONS = {
+  prot: [['all','All']],
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
   form: [['all','All'],['p11','11 Personnel','FORMATIONS','11'],['p12','12 Personnel','FORMATIONS','12'],['p21','21 Personnel','FORMATIONS','21'],['p22','22 Personnel','FORMATIONS','22'],['p23','23 Personnel','FORMATIONS','23']],
   pass: [['all','All'],['half','½ Field','PASS · HALF-FIELD'],['half-2','2 WR','PASS · HALF-FIELD','2 WR',true],['half-3','3 WR','PASS · HALF-FIELD','3 WR',true],['full','Full Field','PASS · FULL-FIELD'],['screens','Screens','PASS · SCREENS'],['roll','Rollouts','PASS · ROLLOUTS']]
 };
 const RUN_PHASES = ['run','rpo','goal line'];
-const tabOf = p => p.phase==='formation' ? 'form' : RUN_PHASES.includes(p.phase) ? 'run' : 'pass';
+const tabOf = p => p.phase==='formation' ? 'form' : p.phase==='protection' ? 'prot' : RUN_PHASES.includes(p.phase) ? 'run' : 'pass';
 let S = {plays:[], asg:[], pages:[], admin:false, user:null};
 const $ = s => document.querySelector(s);
 const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -210,8 +211,8 @@ function listView(kind, sec){
   const def = SECTIONS[kind].find(x=>x[0]===sec) || SECTIONS[kind][0];
   let list = def[2] ? all.filter(p=>p.family===def[2]) : all;
   if (def[3]) list = list.filter(p=>p.subgroup===def[3]);
-  const head = `<h2 class="sh">${esc(def[0]==='all'?(kind==='run'?'All runs':'All passes'):def[1])}</h2><div class="mute">${list.length} plays · ${list.filter(p=>/installed/i.test(p.status)).length} installed</div>`;
-  const callbox = def[0]==='all' ? (kind==='run' ? CALLBOX : (pgHTML('call-pass')||PASSBOX)) : '';
+  const head = `<h2 class="sh">${esc(def[0]==='all'?(kind==='run'?'All runs':kind==='prot'?'Protections':'All passes'):def[1])}</h2><div class="mute">${list.length} plays · ${list.filter(p=>/installed/i.test(p.status)).length} installed</div>`;
+  const callbox = def[0]==='all' ? (kind==='run' ? CALLBOX : kind==='prot' ? pgHTML('protection') : (pgHTML('call-pass')||PASSBOX)) : '';
   const body = callbox + ((def[2]==='PASS · HALF-FIELD' && !def[3])
     ? ['2 WR','3 WR'].map(g=>`<h2 class="fam">${g} sets</h2>`+conceptCards(list.filter(p=>p.subgroup===g))).join('')
     : grouped(list));
@@ -290,6 +291,7 @@ function route(){
   if (v==='learn') return learnView(id);
   if (v==='search') return searchView();
   if (v==='pass') return listView('pass', id);
+  if (v==='prot') return listView('prot', id);
   if (v==='form') return formView(id);
   return formView();
 }
