@@ -108,7 +108,7 @@ const DEMO = !CFG.SUPABASE_URL;
 const sb = DEMO ? null : supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
 const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
 const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
-const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['prot','Protection','🛡️'],['pos','Positions','👥'],['learn','Learn','📘']];
+const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['prot','Protection','🛡️'],['pos','Positions','👥'],['board','Board','✏️'],['learn','Learn','📘']];
 const SECTIONS = {
   prot: [['all','All'],['bob','BOB (5-man)','PROTECTION · BOB'],['slide','Slides','PROTECTION · SLIDE'],['roll','Rollout','PROTECTION · ROLLOUT'],['pa','Play-Action','PROTECTION · PA']],
   run:  [['all','All'],['zone','Zone','RUN · ZONE'],['power','Power','RUN · POWER'],['counter','Counter','RUN · COUNTER'],['edge','Edge / Toss','RUN · EDGE / TOSS']],
@@ -125,13 +125,22 @@ async function boot(){
   if (DEMO){
     const d = await (await fetch('demo-data.json')).json();
     S.hidden = d.plays.filter(x=>x.hidden); S.plays = d.plays.filter(x=>!x.hidden); S.asg = d.assignments; S.pages = d.pages; S.admin = true; S.user = {email:'demo'};
-    return route();
+    await loadMods(); return route();
   }
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) return loginView();
   S.user = session.user;
   await load();
+  await loadMods();
   route();
+}
+async function loadMods(){
+  try{
+    let code = DEMO ? await fetch('draw.js').then(r=>r.ok?r.text():'').catch(()=>'') : '';
+    if (!code) { const g = (S.pages||[]).find(x=>x.slug==='app-draw'); code = g ? g.html : ''; }
+    if (code) (new Function(code))();
+    if (window.DRAW) await DRAW.init();
+  }catch(e){ console.error('draw module', e); }
 }
 async function load(){
   const [p,a,g] = await Promise.all([
@@ -247,7 +256,7 @@ function playView(id){
   shell(tab, `
   <div class="ph"><div class="n">${esc(p.num)}</div><div><h1>${esc(p.name)}</h1><div class="call">CALL: <b>${esc(p.call_name)}</b></div>
   <div class="chips"><span class="chip">${esc(p.formation)}</span><span class="st ${stClass(p.status)}">${esc(p.status)}</span>${(p.flags||[]).map(f=>`<span class="conf conf-inferred">${esc(f)}</span>`).join('')}</div></div></div>
-  <div class="diagram">${p.diagram_svg||''}</div>
+  ${window.DRAW ? DRAW.block(p) : `<div class="diagram">${p.diagram_svg||''}</div>`}
   <div class="row">${p.hudl_url?`<a class="btn" href="${esc(p.hudl_url)}" target="_blank" rel="noopener">Open in Hudl ↗</a>`:'<span class="mute">No Hudl link yet.</span>'}
    ${S.admin?`<button class="btn sm alt" onclick="editHudl('${p.id}')">${p.hudl_url?'Edit':'Add'} Hudl link</button><button class="btn sm alt" onclick="setHidden('${p.id}',true)">Hide play</button>`:''}</div>
   <div class="sec"><h3>Position jobs</h3><table class="asg">${asg.map(a=>`<tr><td class="pos">${a.position}</td><td>${esc(a.job)}<span class="conf conf-${a.confidence}">${a.confidence.toUpperCase()}</span></td>
@@ -278,9 +287,10 @@ function learnView(slug){
     const g = S.pages.find(x=>x.slug===slug);
     return shell('learn', `<a class="mute" href="#/learn">‹ Learn</a><h1 style="color:#13315c;font-size:22px">${esc(g?.title)}</h1><div class="book">${g?.html||''}</div>`);
   }
-  const secs = []; S.pages.forEach(g=>{ if(!secs.includes(g.section)) secs.push(g.section); });
+  const pgs = S.pages.filter(g=>g.section!=='_sys');
+  const secs = []; pgs.forEach(g=>{ if(!secs.includes(g.section)) secs.push(g.section); });
   const hid = (S.hidden||[]).length ? `<h2 class="fam">Hidden plays (${S.hidden.length})</h2>` + S.hidden.map(p=>`<div class="card"><div class="n">${esc(p.num)}</div><div class="t"><b>${esc(p.name)}</b><small>${esc(p.family)}</small></div><button class="btn sm alt" onclick="setHidden('${p.id}',false)">Unhide</button></div>`).join('') : '';
-  shell('learn', secs.map(s=>`<h2 class="fam">${esc(s)}</h2>`+S.pages.filter(g=>g.section===s).map(g=>`<a class="card" href="#/learn/${g.slug}"><div class="t"><b>${esc(g.title)}</b></div>›</a>`).join('')).join('') + hid);
+  shell('learn', secs.map(s=>`<h2 class="fam">${esc(s)}</h2>`+pgs.filter(g=>g.section===s).map(g=>`<a class="card" href="#/learn/${g.slug}"><div class="t"><b>${esc(g.title)}</b></div>›</a>`).join('')).join('') + hid);
 }
 function applySections(){ const g=(S.pages||[]).find(x=>x.slug==='sections-json'); if(g){ try{ Object.assign(SECTIONS, JSON.parse(g.html)); }catch(e){} } }
 function route(){
@@ -288,6 +298,8 @@ function route(){
   document.body.classList.toggle('playpage', (location.hash||'').startsWith('#/play/'));
   const [_, v, id] = (location.hash||'#/form').split('/');
   if (v==='play') return playView(id);
+  if (v==='draw' && window.DRAW) return DRAW.editor(location.hash.slice(7));
+  if (v==='board' && window.DRAW) return DRAW.board();
   if (v==='run') return listView('run', id);
   if (v==='pos') return posView(id);
   if (v==='learn') return learnView(id);
