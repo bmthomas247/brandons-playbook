@@ -65,8 +65,6 @@ h2.fam{font-size:12px;letter-spacing:1.2px;color:var(--navy2);margin:18px 0 8px;
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
 .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--navy2);text-decoration:none}
 .chip.on{background:var(--navy2);color:#fff;border-color:var(--navy2)}
-.swr{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 8px;padding-bottom:4px;scrollbar-width:thin}
-.swr .chip{white-space:nowrap;flex:0 0 auto}
 .ph{display:flex;align-items:flex-start;gap:10px;margin:6px 0 4px}
 .ph .n{font-size:26px;font-weight:800;color:var(--amber)}
 .ph h1{margin:0;font-size:24px;color:var(--navy2)}
@@ -255,10 +253,7 @@ function playView(id){
   const asg = POS.map(pos => S.asg.find(a=>a.play_id===id && a.position===pos)).filter(Boolean);
   const blank = POS.filter(pos => !asg.find(a=>a.position===pos));
   const sib = S.plays.filter(x=>tabOf(x)===tab), i = sib.indexOf(p), prev = sib[i-1], next = sib[i+1];
-  const fam = p.phase==='formation' ? [] : S.plays.filter(x=>tabOf(x)===tab && x.family===p.family && (!sk || !SECTIONS[tab].find(y=>y[0]===sk)[3] || x.subgroup===p.subgroup));
-  if (fam.length<2 && p.phase!=='formation') fam.splice(0, fam.length, ...sib);
-  const swr = fam.length>1 ? `<div class="swr" id="swr">${fam.map(x=>`<a class="chip ${x.id===p.id?'on':''}" href="#/play/${x.id}">${esc(x.name)}</a>`).join('')}</div>` : '';
-  shell(tab, swr + `
+  shell(tab, `
   <div class="ph"><div class="n">${esc(p.num)}</div><div><h1>${esc(p.name)}</h1><div class="call">CALL: <b>${esc(p.call_name)}</b></div>
   <div class="chips"><span class="chip">${esc(p.formation)}</span><span class="st ${stClass(p.status)}">${esc(p.status)}</span>${(p.flags||[]).map(f=>`<span class="conf conf-inferred">${esc(f)}</span>`).join('')}</div></div></div>
   ${window.DRAW ? DRAW.block(p) : `<div class="diagram">${p.diagram_svg||''}</div>`}
@@ -275,7 +270,6 @@ function playView(id){
   ${p.sequence?`<div class="sec"><h3>Sequence</h3><p>${esc(p.sequence)}</p></div>`:''}
   <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, railHTML(tab, sk || 'all', p.id));
   window.scrollTo(0,0);
-  const on = document.querySelector('#swr .on'); if (on) on.parentNode.scrollLeft = on.offsetLeft - on.parentNode.offsetLeft - 40;
 }
 function posView(pos){
   pos = pos || 'Q';
