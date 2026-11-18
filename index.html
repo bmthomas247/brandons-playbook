@@ -297,26 +297,68 @@ const FILM = {
   '4 Verts': [
     ['Choice route: defender 7+ yds off → throw the hitch now. Outside WRs release outside; landmarks are the numbers and hashes.', 'Coach Ross (credits Patrick Taylor)', YT('jo3ZcZtG_w4')]],
   'Power': [
+    ['Playside linemen block down, the end is left for the F to kick out, the guard leads through and takes the first defender he sees. Lane looks like railroad tracks (our train-track).', 'Understanding the Trickeration, 2010', 'https://understandingthetrickeration.wordpress.com/2010/05/02/power-counter-runs/'],
+    ['Double team: post man aims at the inside number, eyes on the backside LB, leaves only when that LB reaches him. Drive man keys the near hip.', 'Keith Grabowski, AFQ', 'https://xsandos.americanfootballquarterly.com/distort-and-displace-with-double-teams'],
+    ['Skip pull: small back step, skip, work tight off the double, eyes on the LB. Kill penetration first, then the scraper. If the kick logs, bow deeper.', 'Grabowski, AFQ / Brian Hughes, Gridiron Strategies', 'https://xsandos.americanfootballquarterly.com/use-the-proper-tool-pulling-technique'],
+    ['Down block: 45° step with the inside foot, aim at the V of the neck.', 'Grabowski, USA Football', 'https://blogs.usafootball.com/blog/1332/building-an-offensive-line-teaching-safe-and-effective-down-blocks'],
+    ['Possible new Power tags (Brandon names them): Down Power (no doubles), Bounce (F logs the end), Y Boss (Y widens a 6/6i end), Lead (TE/OT kicks, F leads).', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2018/12/football-fundamentals-i-formation-rb-gap-pull-run-plays.html'],
+    ['Vs Tite: run it to a 3-man surface. PSG down on the nose, PST and extra man down. Guards don\'t climb early.', 'Zach Dunn via USA Football', 'https://blogs.usafootball.com/blog/7359/podcast-review-learn-how-to-defeat-the-tite-front'],
+    ['Tite is built to spill pullers: the playside ILB takes the puller with his inside shoulder.', 'Viqtory Sports', 'https://www.viqtorysports.com/tite-front-install-guide/'],
+
     ['Playside doubles go up to the backside LB, center blocks back, backside guard wraps to the playside LB, backside tackle hinges or stays home B to C. F kicks the end man on the line at his inside shoulder.', 'Derek Leonard, Glazier', YT('1F_B5byaDww')],
     ['RB aims at the playside guard\'s inside leg, then B to C.', 'Derek Leonard, Glazier', YT('1F_B5byaDww')],
     ['Vs 4i/odd: don\'t block back on a 4i and don\'t base him. Vs 3-3: center/guard double the nose up to the backside LB, tackle/TE double up to the Mike, kick the 9.', 'Wide Zone Warriors', YT('Q-JG152tNFw')]],
   'Counter': [
+    ['Counter OF: guard kicks, F leads to the playside LB. Counter OT: 1st puller kicks, 2nd leads. Log it when the defense pinches. Dart: tackle pulls.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2018/12/football-fundamentals-i-formation-rb-counter-run-plays.html'],
+    ['From 2 backs, F blocks the backside end so the guard AND tackle can both pull.', 'Understanding the Trickeration, 2010', 'https://understandingthetrickeration.wordpress.com/2010/05/02/power-counter-runs/'],
+    ['Vs Tite (GT): PST on the 4i, PSG folds and kicks, H leads.', 'Coach Kou', 'https://coachkoufootball.substack.com/p/attacking-tite-and-odd-front-in-run'],
+
     ['Front side same as Power. Backside guard kicks the end man on the line; 2nd puller wraps to the first LB in the box. Log a wrong-arm.', 'Coach Bill Renner', YT('Ha-hqz0VkoI')],
     ['Climber target by LB count: 2 LBs → backside LB, 3 → Mike, 1 → that LB.', 'Coach Devin Bice', YT('j4y2a5lBiGE')]],
   'Iso': [
+    ['Train-track shape: doubles and down blocks wall the inside, OT/TE plus the F wall the outside, TB stays on the F\'s inside hip. No true kick-out on Iso.', 'Space Coyote Iso primer', 'https://breakdownsports.blogspot.com/2015/01/football-fundamentals-iso-run-play-primer.html'],
+    ['F aims at the PSG\'s outside leg. LB scrapes → seal him out; squeezes → seal in; fills → drive him.', 'Space Coyote Iso primer', 'https://breakdownsports.blogspot.com/2015/01/football-fundamentals-iso-run-play-primer.html'],
+    ['Vs 3-4: C and RG double the nose to the backside ILB; F on the playside ILB.', 'AJ Forbes, Throw Deep', 'https://throwdeeppublishing.com/blogs/football-glossary/the-iso-play-everything-you-need-to-know'],
+
     ['Block it with zone rules up front; the lead back takes the open LB and the RB reads the lead block. Vs 3-3, double across and lead on the stacked LB.', 'Coach Chip', YT('9QD_H78rESc')],
     ['FB and TB both run tight tracks so the LB gets caught in the wash.', 'Coach Hayes', YT('kpLwz31mEj4')]],
   'Zone': [
+    ['Vs Tite split zone: PST+PSG double the 4i to the Will, C+BSG double the nose to the Mike, F kicks the backside edge.', 'Leister, USA Football', 'https://blogs.usafootball.com/blog/7458/attacking-the-tite-front-with-inside-zone'],
+
     ['Inside zone aims at the playside number; outside zone at the armpit. Both steps hit before the hands.', 'Pete Traynor, Urbandale HS', YT('c95r03IEUxY')]],
   'Toss': [
     ['Playside reaches and climbs, nobody blocks the man on the LOS, playside guard pulls flat. Pitch caught at or outside the wing\'s spot.', 'Glazier Clinics (Wing-T)', YT('GSczj4Jm54A')]]
 };
-const filmFor = p => { if (!['run','pass'].includes(tabOf(p))) return [];
-  const hay = ' '+[p.name,p.concept].filter(Boolean).join(' ')+' ';
-  return Object.keys(FILM).filter(k => new RegExp('[^A-Za-z0-9]'+k.replace(/[-]/g,'[- ]?')+'[^A-Za-z0-9]','i').test(hay)).flatMap(k=>FILM[k].map(n=>[k,...n])); };
+const PROT = {
+  'BOB': [
+    ['Covered linemen block the man on or shading them. Uncovered man double-reads with his inside neighbor to the Mike. Center names the Mike.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2013/11/inside-playbook-pass-protection-schemes.html'],
+    ['Handles all DL plus one inside blitzer. Two LBs come → throw hot.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2013/11/inside-playbook-pass-protection-schemes.html'],
+    ['Mike ID: 4 down → 1 Mike; 3 down → 2 Mikes.', 'Raj Dhami, The Call Sheet', 'https://the-call-sheet.beehiiv.com/p/003'],
+    ['C and both guards covered → all five take the most dangerous rushers. 6 on the line → hot.', 'Diante Lee, PFF', 'https://pff.com/news/nfl-how-nfl-defenses-attacked-five-man-protections-2021']],
+  'Rib': [
+    ['Find the first open gap to the call side: linemen inside it slide, outside it are man. Odd fronts usually make it a 4-man slide.', 'Coach J, QFB', 'https://queerfootballbreakdowns.substack.com/p/half-slide-protection-review-and'],
+    ['Center calls the slide, guards echo. Slide toward the likeliest 5th rusher; change it weekly by opponent.', 'Ken Wilmesherr, Gridiron Strategies', 'https://gridironstrategies.com/article/slide-protection-schemes-and-technique-the-3-step-passing-game'],
+    ['RB fill technique: step to the lineman\'s heels, outside foot on the rusher.', 'Danny Kelly, The Ringer', 'https://www.theringer.com/2018/8/16/17696798/running-back-pass-protection'],
+    ['Hot: a 5th rusher away from the slide, or any 6th, is the QB/WR\'s problem. WR breaks inside the next defender; ball out by step 3.', 'Charlie Coiner, FirstDown', 'https://firstdown.playbooktech.com/coaches-community/hot-you-better-know-how']],
+  'Bread': [
+    ['Everyone owns his gap; the away tackle slow-plays. RB alone on the DE (matches ours). Weak vs a sim pressure that rushes four.', 'Ken Wilmesherr, Gridiron Strategies / Diante Lee, PFF', 'https://gridironstrategies.com/article/try-these-highly-effective-slide-protection-schemes-and-game-tested-techniques']],
+  'Razor': [
+    ['Line steps like inside zone, each man owns a gap; the backs take anyone late outside the call-side tackle.', 'Alex Kirby, Throw Deep', 'https://throwdeeppublishing.com/blogs/news/ferris-state-offense-play-action-pass-concepts'],
+    ['Line sells run but doesn\'t go downfield. QB fake comes between drop steps 2 and 3.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2014/09/football-fundamentals-play-action-pass-protection-blocking.html']],
+  'Prop': [
+    ['Line barely changes from the Power run: front side down, puller stays on level 1 instead of wrapping, backside tackle blocks man.', 'Joe Austin, AFQ', 'https://xsandos.americanfootballquarterly.com/rev-up-your-jet-motion-offense-with-explosive-play-action-passes-part-ii/']],
+  'Rodeo': [
+    ['One-guard waggle: puller blocks outside-in past the TE, center fills his A gap, backside tackle takes the end man.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2014/09/football-fundamentals-play-action-pass-protection-blocking.html'],
+    ['QB reverses out, gains depth first, then attacks the launch point. End slow-plays then attacks → flat or throw it away; end crashes → flat.', 'Dusty Evely', 'https://dustyevely.substack.com/p/when-open-isnt-open-part-2-pa-boot'],
+    ['Which guards pull and each job: not settled. Brandon\'s call.', 'Gridiron Strategies (Wing-T pulls two)', 'https://gridironstrategies.com/article/the-spread-wing-t-offense', 1]]
+};
+PROT.Leg=PROT.Rib; PROT.Pork=PROT.Rib; PROT.Lamb=PROT.Rib; PROT.Bagel=PROT.Bread; PROT.Blaze=PROT.Razor; PROT.Plug=PROT.Prop; PROT.Lasso=PROT.Rodeo;
+const filmFor = p => { const t = tabOf(p), M = t==='prot' ? PROT : ['run','pass'].includes(t) ? FILM : null; if (!M) return [];
+  const hay = ' '+[p.name,p.concept].filter(Boolean).join(' ')+' ', seen = new Set();
+  return Object.keys(M).filter(k => new RegExp('[^A-Za-z0-9]'+k.replace(/[-]/g,'[- ]?')+'[^A-Za-z0-9]','i').test(hay)).filter(k => !seen.has(M[k]) && seen.add(M[k])).flatMap(k=>M[k].map(n=>[k,...n])); };
 const filmHTML = p => { const n = filmFor(p); if (!n.length) return '';
   return `<details class="sec film"><summary>Film notes <span class="conf conf-inferred">INFERRED</span> <span class="mute" style="text-transform:none;letter-spacing:0;font-weight:600">· ${n.length}</span></summary>
-  <p class="mute" style="font-size:12px;margin-top:6px">From outside coaching videos. Not our rules until Brandon signs off.</p>
+  <p class="mute" style="font-size:12px;margin-top:6px">From outside coaching videos and articles. Not our rules until Brandon signs off.</p>
   <ul>${n.map(([k,t,s,u,d])=>`<li>${d?'<span class="diff">⚠ Differs: '+t+'</span>':t}<span class="src">${n.some(x=>x[0]!==k)?esc(k)+' · ':''}<a href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a></span></li>`).join('')}</ul></details>`; };
 function playView(id){
   const p = S.plays.find(x=>x.id===id); if (!p) return listView('run');
