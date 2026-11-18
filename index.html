@@ -358,7 +358,7 @@ const PROT = {
   'Rodeo': [
     ['One-guard waggle: puller blocks outside-in past the TE, center fills his A gap, backside tackle takes the end man.', 'Space Coyote, Breakdown Sports', 'https://breakdownsports.blogspot.com/2014/09/football-fundamentals-play-action-pass-protection-blocking.html'],
     ['QB reverses out, gains depth first, then attacks the launch point. End slow-plays then attacks → flat or throw it away; end crashes → flat.', 'Dusty Evely', 'https://dustyevely.substack.com/p/when-open-isnt-open-part-2-pa-boot'],
-    ['Which guards pull and each job: not settled. Brandon\'s call.', 'Gridiron Strategies (Wing-T pulls two)', 'https://gridironstrategies.com/article/the-spread-wing-t-offense', 1]]
+    ['Frontside guard pulls, playside tackle blocks down. Puller\'s exact job not set yet.', 'Brandon, Nov 17 2026', '', 2]]
 };
 PROT.Leg=PROT.Rib; PROT.Pork=PROT.Rib; PROT.Lamb=PROT.Rib; PROT.Bagel=PROT.Bread; PROT.Blaze=PROT.Razor; PROT.Plug=PROT.Prop; PROT.Lasso=PROT.Rodeo;
 const filmFor = p => { const t = tabOf(p), M = t==='prot' ? PROT : ['run','pass'].includes(t) ? FILM : null; if (!M) return [];
@@ -367,7 +367,7 @@ const filmFor = p => { const t = tabOf(p), M = t==='prot' ? PROT : ['run','pass'
 const filmHTML = p => { const n = filmFor(p); if (!n.length) return '';
   return `<details class="sec film"><summary>Film notes <span class="conf conf-inferred">INFERRED</span> <span class="mute" style="text-transform:none;letter-spacing:0;font-weight:600">· ${n.length}</span></summary>
   <p class="mute" style="font-size:12px;margin-top:6px">From outside coaching videos and articles. Not our rules until Brandon signs off.</p>
-  <ul>${n.map(([k,t,s,u,d])=>`<li>${d?'<span class="diff">⚠ Differs: '+t+'</span>':t}<span class="src">${n.some(x=>x[0]!==k)?esc(k)+' · ':''}<a href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a></span></li>`).join('')}</ul></details>`; };
+  <ul>${n.map(([k,t,s,u,d])=>`<li>${d===2?'<b>Ours:</b> '+t:d?'<span class="diff">⚠ Differs: '+t+'</span>':t}<span class="src">${n.some(x=>x[0]!==k)?esc(k)+' · ':''}${u?`<a href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a>`:esc(s)}</span></li>`).join('')}</ul></details>`; };
 function playView(id){
   const p = S.plays.find(x=>x.id===id); if (!p) return listView('run');
   const tab = tabOf(p);
