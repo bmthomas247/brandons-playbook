@@ -75,6 +75,9 @@ h2.fam{font-size:12px;letter-spacing:1.2px;color:var(--navy2);margin:18px 0 8px;
 .sec.attack{background:#fff7ed;border-color:#fed7aa}
 .sec p,.sec li{font-size:14.5px;line-height:1.5;margin:0}
 .sec ul{margin:0;padding-left:18px}
+.film summary{cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#1e3a8a;font-weight:700}
+.film li{margin:6px 0}.film .src{display:block;font-size:12px;color:var(--mute)}.film .src a{color:inherit}
+.film .diff{background:#fef3c7;border-radius:6px;padding:2px 6px}
 table.asg{width:100%;border-collapse:collapse}
 table.asg td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
 table.asg td.pos{width:44px;font-weight:800;color:var(--navy2);font-size:15px}
@@ -246,6 +249,75 @@ function searchView(){
       .join(' ').replace(/<[^>]+>/g,'').toLowerCase().includes(q) || S.asg.some(a=>a.play_id===p.id && a.job.toLowerCase().includes(q)));
   shell('search', q ? `<div class="mute">${hits.length} results</div>` + hits.map(card).join('') : '<p class="mute">Type to search.</p>');
 }
+// Film notes from outside coaching videos / newsletters (Nov 17 2026). All INFERRED until Brandon signs off.
+// Each note: [text, source label, url, differsFromOurRule?]. Keys match play name or concept (whole word).
+const YT = id => 'https://www.youtube.com/watch?v='+id;
+const FILM = {
+  'Smash': [
+    ['QB picks a side pre-snap and reads the corner. Corner bails → hitch. Corner sits or plays man → corner.', 'Glazier Clinics', YT('Z7wmGoYTjnk')],
+    ['Off corner pre-snap → throw the hitch on 1 step.', 'Glazier Clinics', YT('Z7wmGoYTjnk')],
+    ['Corner chases space: flat under the safety vs 2-high, vertical past the corner vs 1-high, break away vs man.', 'Viqtory Sports (Chris Haddad)', YT('FMiikRWl_a4')],
+    ['Hitch at about 6 yds, not our 4→2. Brandon\'s call.', 'Glazier / Viqtory', YT('FMiikRWl_a4'), 1]],
+  'Shears': [
+    ['Post-corner off a Power fake: the fake back fills the edge, QB takes 2-3 steps after the fake, motion back flares as the checkdown.', 'Youth Football Online', YT('hcK101B5eUA')]],
+  'Snag': [
+    ['Read flat → snag → corner. Snag works back outside; don\'t sprint it.', 'FirstDown PlayBook', YT('BP-mCcL7P3Q')],
+    ['Snag is a window read off the apex backer: slide to the window the LBs leave. RB shoot is faster than a bubble. Curl stays out of the QB\'s line to the snag.', 'Tilford Myers, Coaches Daily Jun 29 2026', 'https://footballcoach.com/snag-as-a-window-read-not-a-spot-the-apex-backer-rule-the-curl-fix-and-shoot-over-bubble/'],
+    ['Vs press man, the spot route whips out.', 'American Football Academy', YT('UanHlokVrrs')]],
+  'Stick': [
+    ['Throw off the flat defender: he widens → stick; he sits → flat.', 'Weekly Spiral', YT('XAabLmnpwnM')],
+    ['Outside go = pre-snap alert. Stick option-outs vs press.', 'American Football Academy', YT('P_kF6UrH7Ag')]],
+  'Levels': [
+    ['QB eyes the defender over #2. He sinks → 5-yd in. He jumps the in → 10-yd dig.', 'Philadelphia Eagles (Ross Tucker)', YT('qp7HK5RBfW4')],
+    ['Half-field Levels pairs with Smash or curl-flat.', 'DK Pittsburgh Sports (Chris Hack)', YT('G_fF8AboNiw')]],
+  'Dagger': [
+    ['Dig at 14-16 so it breaks behind the LBs. Dig runner stays under the clear-out.', 'American Football Academy', YT('cKhwoYlv6Z4')],
+    ['Prefers a 5-yd bait route over a true flat.', 'Josh Snow', YT('w6SHKl7jlrA')],
+    ['Both videos call the dig side a 2-high beater, weak vs Cover 3. We pair Dagger as the 1-high beater. Brandon\'s call.', 'Josh Snow / AFA', YT('w6SHKl7jlrA'), 1]],
+  'Flood': [
+    ['Throw the middle route the moment the deep defender turns his back. #1 can\'t get held up at the line.', 'Terrance Banks', YT('vUF9kz237sk')],
+    ['Read the playside safety, then throw opposite the curl defender.', 'Wide Zone Warriors', YT('0MIn2ZXuw0Y')],
+    ['Sail breaks at 12-15 yds in these videos; ours goes to 10. Brandon\'s call.', 'Banks / Wide Zone Warriors / Weekly Spiral', YT('iw57RdnvUAM'), 1]],
+  'Gash': [
+    ['Get flat vs man or a driving off corner. Inside slant goes across the LB\'s face; LB drops → get skinny. Throw on the body or low.', 'Coaches Caviar', YT('TJNc4q_8i7U')]],
+  'Gust': [
+    ['Get flat vs man or a driving off corner. Throw on the body or low.', 'Coaches Caviar', YT('TJNc4q_8i7U')]],
+  'Glance': [
+    ['Backside X of 3x1, stem at the DB. Not a skinny post, not a dig.', 'QB Dots', YT('IZVhha-gF1k')],
+    ['Breaks at 10 on a flattened post, ball lands 17-20 yds, QB takes 3 steps, sits, throws. Ours is a 5-step slant. Brandon\'s call.', 'QB Dots', YT('IZVhha-gF1k'), 1]],
+  'Mesh': [
+    ['Meshers slap hands to stay tight. Vs zone, sit and show hands. Vs man, keep moving.', 'Glazier Clinics', YT('bOJLLoswYzY')],
+    ['After the 1st read, QB eyes stay in front of the mesher, not behind him.', 'AJ Milwee (Texas)', YT('B7_y28WGOk8')],
+    ['Their version: slot on top, dig at 12, 6-man protection, RB rail or swing. Ours stays Y under, dig at 10, RB Fan, BOB.', 'Glazier / Milwee', YT('bOJLLoswYzY'), 1]],
+  'Y-Cross': [
+    ['Under Sam, over Mike, which matches our rule. Vs press man, the slot runs a whip to clear space for Y.', 'Lonestar Coaches Network', YT('-x2EmsnQLNE')],
+    ['If the safety jumps the cross, the backside post opens.', 'Viqtory Sports (Chris Haddad)', YT('1gVk_nmw_uo')]],
+  'Drive': [
+    ['Shallow must stay flat or it clogs the dig. Read vertical → dig → shallow. A stay-in back makes it 7-man.', 'Youth Football Online', YT('etV_aq0KksQ')]],
+  '4 Verts': [
+    ['Choice route: defender 7+ yds off → throw the hitch now. Outside WRs release outside; landmarks are the numbers and hashes.', 'Coach Ross (credits Patrick Taylor)', YT('jo3ZcZtG_w4')]],
+  'Power': [
+    ['Playside doubles go up to the backside LB, center blocks back, backside guard wraps to the playside LB, backside tackle hinges or stays home B to C. F kicks the end man on the line at his inside shoulder.', 'Derek Leonard, Glazier', YT('1F_B5byaDww')],
+    ['RB aims at the playside guard\'s inside leg, then B to C.', 'Derek Leonard, Glazier', YT('1F_B5byaDww')],
+    ['Vs 4i/odd: don\'t block back on a 4i and don\'t base him. Vs 3-3: center/guard double the nose up to the backside LB, tackle/TE double up to the Mike, kick the 9.', 'Wide Zone Warriors', YT('Q-JG152tNFw')]],
+  'Counter': [
+    ['Front side same as Power. Backside guard kicks the end man on the line; 2nd puller wraps to the first LB in the box. Log a wrong-arm.', 'Coach Bill Renner', YT('Ha-hqz0VkoI')],
+    ['Climber target by LB count: 2 LBs → backside LB, 3 → Mike, 1 → that LB.', 'Coach Devin Bice', YT('j4y2a5lBiGE')]],
+  'Iso': [
+    ['Block it with zone rules up front; the lead back takes the open LB and the RB reads the lead block. Vs 3-3, double across and lead on the stacked LB.', 'Coach Chip', YT('9QD_H78rESc')],
+    ['FB and TB both run tight tracks so the LB gets caught in the wash.', 'Coach Hayes', YT('kpLwz31mEj4')]],
+  'Zone': [
+    ['Inside zone aims at the playside number; outside zone at the armpit. Both steps hit before the hands.', 'Pete Traynor, Urbandale HS', YT('c95r03IEUxY')]],
+  'Toss': [
+    ['Playside reaches and climbs, nobody blocks the man on the LOS, playside guard pulls flat. Pitch caught at or outside the wing\'s spot.', 'Glazier Clinics (Wing-T)', YT('GSczj4Jm54A')]]
+};
+const filmFor = p => { if (!['run','pass'].includes(tabOf(p))) return [];
+  const hay = ' '+[p.name,p.concept].filter(Boolean).join(' ')+' ';
+  return Object.keys(FILM).filter(k => new RegExp('[^A-Za-z0-9]'+k.replace(/[-]/g,'[- ]?')+'[^A-Za-z0-9]','i').test(hay)).flatMap(k=>FILM[k].map(n=>[k,...n])); };
+const filmHTML = p => { const n = filmFor(p); if (!n.length) return '';
+  return `<details class="sec film"><summary>Film notes <span class="conf conf-inferred">INFERRED</span> <span class="mute" style="text-transform:none;letter-spacing:0;font-weight:600">· ${n.length}</span></summary>
+  <p class="mute" style="font-size:12px;margin-top:6px">From outside coaching videos. Not our rules until Brandon signs off.</p>
+  <ul>${n.map(([k,t,s,u,d])=>`<li>${d?'<span class="diff">⚠ Differs: '+t+'</span>':t}<span class="src">${n.some(x=>x[0]!==k)?esc(k)+' · ':''}<a href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a></span></li>`).join('')}</ul></details>`; };
 function playView(id){
   const p = S.plays.find(x=>x.id===id); if (!p) return listView('run');
   const tab = tabOf(p);
@@ -268,6 +340,7 @@ function playView(id){
   <div class="sec"><h3>Why we call it</h3><p>${p.why||''}</p></div>
   ${(p.keys||[]).length?`<div class="sec"><h3>Coaching keys</h3><ul>${p.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>`:''}
   ${p.sequence?`<div class="sec"><h3>Sequence</h3><p>${esc(p.sequence)}</p></div>`:''}
+  ${filmHTML(p)}
   <div class="row" style="justify-content:space-between">${prev?`<a class="btn alt sm" href="#/play/${prev.id}">‹ ${esc(prev.name)}</a>`:'<span></span>'}${next?`<a class="btn alt sm" href="#/play/${next.id}">${esc(next.name)} ›</a>`:''}</div>`, railHTML(tab, sk || 'all', p.id));
   window.scrollTo(0,0);
 }
