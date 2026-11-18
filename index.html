@@ -109,8 +109,9 @@ dialog select,dialog input{font-size:15px;padding:8px;border-radius:8px;border:1
 const CFG = window.PIRATE_CONFIG || {};
 const DEMO = !CFG.SUPABASE_URL;
 const sb = DEMO ? null : supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
-const POS = ['Q','T','F','X','Z','Y','H','S','OL'];
-const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end (anchor)',H:'2nd TE (mover)',S:'Slot',OL:'Offensive line'};
+const POS = ['Q','T','F','X','Z','Y','H','B','S','OL'];
+// TE letters (Brandon, Nov 18 2026): Y = 1st TE on the field (blocks + catches), H = 2nd TE (move TE, mainly a receiver), B = "Big Boy", 3rd TE (blocker), used last.
+const POSNAME = {Q:'Quarterback',T:'Tailback',F:'Fullback',X:'Split end',Z:'Flanker',Y:'Tight end · 1st TE (blocks + catches)',H:'Move TE · 2nd TE (receiver)',B:'Big Boy · 3rd TE (blocker)',S:'Slot',OL:'Offensive line'};
 const TABS = [['form','Formations','📐'],['run','Run','🏈'],['pass','Pass','🎯'],['prot','Protection','🛡️'],['pos','Positions','👥'],['board','Board','✏️'],['learn','Learn','📘']];
 const SECTIONS = {
   prot: [['all','All'],['bob','BOB (5-man)','PROTECTION · BOB'],['slide','Slides','PROTECTION · SLIDE'],['roll','Rollout','PROTECTION · ROLLOUT'],['pa','Play-Action','PROTECTION · PA']],
